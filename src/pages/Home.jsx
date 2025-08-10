@@ -5,7 +5,7 @@ import TeamOrbit from "../components/TeamOrbit";
 import HintText from "../components/HintText";
 import SolarSystem from "../components/SolarSystem";
 import Quiz from "../components/Quiz";
-
+import SatelliteSection from "../components/SatelliteSection";
 export default function Home() {
   const [containerSize, setContainerSize] = useState(
     Math.min(window.innerWidth * 0.66, 600)
@@ -47,12 +47,14 @@ export default function Home() {
       <HintText />
 
       {/* Solar System Section */}
-      <section
-        className="w-full max-w-5xl mt-20 opacity-0 animate-fadeInUp animation-delay-300 relative z-20"
-        style={{ animationFillMode: "forwards", animationDuration: "1s" }}
-      >
+     <section
+  className="w-full h-screen max-w-none mt-20 opacity-0 animate-fadeInUp animation-delay-300 relative z-20"
+  style={{ animationFillMode: "forwards", animationDuration: "1s" }}
+>
         <SolarSystem />
       </section>
+
+      <SatelliteSection />
 
       {/* Quiz Section */}
       <section

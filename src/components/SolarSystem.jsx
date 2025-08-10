@@ -28,73 +28,74 @@ export default function SolarSystem() {
   const closeDetails = useCallback(() => setSelectedPlanet(null), []);
 
   return (
-    <div className="bg-black min-h-screen text-white flex flex-col items-center py-10 relative">
-      <div
-        className="relative w-[700px] h-[700px] max-w-full rounded-lg overflow-hidden"
-        aria-describedby={selectedPlanet ? "planet-details" : undefined}
+    <div className="bg-black w-full h-screen text-white relative">
+      <Canvas
+        camera={{ position: [0, 100, 200], fov: 60 }}
+        className="w-full h-full"
       >
-        <Canvas camera={{ position: [0, 100, 200], fov: 60 }}>
-          {/* Space background */}
-          <Stars radius={300} depth={60} count={20000} factor={7} fade />
+        {/* Space background */}
+        <Stars radius={300} depth={60} count={20000} factor={7} fade />
 
-          {/* Lights */}
-          <pointLight position={[0, 0, 0]} intensity={2} />
-          <ambientLight intensity={0.3} />
+        {/* Lights */}
+        <pointLight position={[0, 0, 0]} intensity={2} />
+        <ambientLight intensity={0.3} />
 
-          {/* Sun */}
-          <mesh position={[0, 0, 0]}>
-            <sphereGeometry args={[12, 32, 32]} />
-            <meshStandardMaterial emissive={"yellow"} emissiveIntensity={1.5} />
-          </mesh>
+        {/* Sun */}
+        <mesh position={[0, 0, 0]}>
+          <sphereGeometry args={[12, 32, 32]} />
+          <meshStandardMaterial emissive={"yellow"} emissiveIntensity={1.5} />
+        </mesh>
 
-          {/* Orbits & planets */}
-          {planets.map(({ name, size, distance, color, speed }, i) => (
-            <group key={name}>
-              {/* Orbit colored by orbit number */}
-              <OrbitRing radius={distance / 2} color={orbitColors[i % orbitColors.length]} />
-              <Planet
-                name={name}
-                size={size / 2}
-                distance={distance / 2}
-                color={color}
-                speed={speed}
-                onClick={handlePlanetClick}
-              />
-            </group>
-          ))}
-
-          {/* Camera controls */}
-          <OrbitControls />
-        </Canvas>
-
-        {/* Details panel */}
-        {selectedPlanet && (
-          <>
-            <div
-              onClick={closeDetails}
-              className="absolute inset-0 bg-black bg-opacity-70 z-[1100]"
+        {/* Orbits & planets */}
+        {planets.map(({ name, size, distance, color, speed }, i) => (
+          <group key={name}>
+            {/* Orbit colored by orbit number */}
+            <OrbitRing
+              radius={distance / 2}
+              color={orbitColors[i % orbitColors.length]}
             />
-            <section
-              id="planet-details"
-              className="absolute top-1/2 left-1/2 max-w-xl w-[90vw] bg-gray-900 rounded-lg p-6 shadow-lg text-white z-[1110] -translate-x-1/2 -translate-y-1/2"
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="planet-details-title"
+            <Planet
+              name={name}
+              size={size / 2}
+              distance={distance / 2}
+              color={color}
+              speed={speed}
+              onClick={handlePlanetClick}
+            />
+          </group>
+        ))}
+
+        {/* Camera controls */}
+        <OrbitControls />
+      </Canvas>
+
+      {/* Details panel */}
+      {selectedPlanet && (
+        <>
+          <div
+            onClick={closeDetails}
+            className="absolute inset-0 bg-black bg-opacity-70 z-[1100]"
+          />
+          <section
+            id="planet-details"
+            className="absolute top-1/2 left-1/2 max-w-xl w-[90vw] bg-gray-900 rounded-lg p-6 shadow-lg text-white z-[1110] -translate-x-1/2 -translate-y-1/2"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="planet-details-title"
+          >
+            <button
+              onClick={closeDetails}
+              className="absolute top-3 right-3 text-red-500 hover:text-red-400 text-xl font-bold"
             >
-              <button
-                onClick={closeDetails}
-                className="absolute top-3 right-3 text-red-500 hover:text-red-400 text-xl font-bold"
-              >
-                &times;
-              </button>
-              <h3 id="planet-details-title" className="text-3xl font-bold mb-4">
-                {planetInfo?.name}
-              </h3>
-              <p className="text-lg">{planetInfo?.info}</p>
-            </section>
-          </>
-        )}
-      </div>
+              &times;
+            </button>
+            <h3 id="planet-details-title" className="text-3xl font-bold mb-4">
+              {planetInfo?.name}
+            </h3>
+            <p className="text-lg">{planetInfo?.info}</p>
+          </section>
+        </>
+      )}
     </div>
   );
 }
