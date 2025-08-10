@@ -1,107 +1,128 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useRef } from "react";
+import * as THREE from "three"; // ✅ Import THREE
+import { Canvas, useFrame } from "@react-three/fiber";
+import { OrbitControls, Stars } from "@react-three/drei";
 import planets from "../data/planetsData";
 
 export default function SolarSystem() {
   const [selectedPlanet, setSelectedPlanet] = useState(null);
   const planetInfo = planets.find((p) => p.name === selectedPlanet);
 
+  const handlePlanetClick = useCallback((name) => {
+    setSelectedPlanet(name);
+  }, []);
+
+  const closeDetails = useCallback(() => setSelectedPlanet(null), []);
+
   return (
     <div className="bg-black min-h-screen text-white flex flex-col items-center py-10 relative">
       <div
-        className="relative w-[700px] h-[700px] bg-gradient-to-b from-[#0a0d1a] to-black rounded-lg overflow-visible"
+        className="relative w-[700px] h-[700px] max-w-full rounded-lg overflow-hidden"
+        aria-describedby={selectedPlanet ? "planet-details" : undefined}
       >
-        {/* Sun */}
-        <div
-          className="absolute top-1/2 left-1/2 w-24 h-24 rounded-full bg-yellow-400 shadow-lg
-          -translate-x-1/2 -translate-y-1/2 flex items-center justify-center
-          text-black font-bold text-xl select-none z-[999] pointer-events-none"
-        >
-          ☀️ Sun
-        </div>
+        <Canvas camera={{ position: [0, 100, 200], fov: 60 }}>
+          {/* Space background */}
+          <Stars radius={300} depth={60} count={20000} factor={7} fade />
 
-        {/* Orbits */}
-        {planets.map(({ distance }, i) => (
-          <div
-            key={"orbit-" + i}
-            className="absolute rounded-full border border-gray-700/40 pointer-events-none"
-            style={{
-              width: distance * 2,
-              height: distance * 2,
-              top: `calc(50% - ${distance}px)`,
-              left: `calc(50% - ${distance}px)`,
-              zIndex: 1000 - distance,
-            }}
-          />
-        ))}
+          {/* Lights */}
+          <pointLight position={[0, 0, 0]} intensity={2} />
+          <ambientLight intensity={0.3} />
 
-        {/* Planets */}
-        {planets.map(({ name, size, distance, color, speed }) => {
-          const duration = 40 / speed;
-          return (
-            <div
-              key={name}
-              className="absolute top-1/2 left-1/2 rounded-full"
-              style={{
-                width: distance * 2,
-                height: distance * 2,
-                marginTop: -distance,
-                marginLeft: -distance,
-                animation: `spin ${duration}s linear infinite`,
-                zIndex: 1000 - distance,
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => setSelectedPlanet(name)}
-                className="absolute rounded-full cursor-pointer shadow-lg hover:scale-125 transition-transform duration-300"
-                style={{
-                  width: size,
-                  height: size,
-                  top: "50%",
-                  left: "100%",
-                  marginTop: -size / 2,
-                  marginLeft: -size / 2,
-                }}
-                title={name}
-              >
-                <div className={`${color} w-full h-full rounded-full`} />
-              </button>
-            </div>
-          );
-        })}
+          {/* Sun */}
+          <mesh position={[0, 0, 0]}>
+            <sphereGeometry args={[12, 32, 32]} />
+            <meshStandardMaterial emissive={"yellow"} emissiveIntensity={1.5} />
+          </mesh>
+
+          {/* Orbits & planets */}
+          {planets.map(({ name, size, distance, color, speed }) => (
+            <group key={name}>
+              {/* Orbit matches planet color */}
+              <OrbitRing radius={distance / 2} color={color} />
+              <Planet
+                name={name}
+                size={size / 2}
+                distance={distance / 2}
+                color={color}
+                speed={speed}
+                onClick={handlePlanetClick}
+              />
+            </group>
+          ))}
+
+          {/* Camera controls */}
+          <OrbitControls />
+        </Canvas>
 
         {/* Details panel */}
         {selectedPlanet && (
           <>
             <div
-              onClick={() => setSelectedPlanet(null)}
+              onClick={closeDetails}
               className="absolute inset-0 bg-black bg-opacity-70 z-[1100]"
             />
-            <div
+            <section
+              id="planet-details"
               className="absolute top-1/2 left-1/2 max-w-xl w-[90vw] bg-gray-900 rounded-lg p-6 shadow-lg text-white z-[1110] -translate-x-1/2 -translate-y-1/2"
-              role="region"
-              aria-live="polite"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="planet-details-title"
             >
               <button
-                onClick={() => setSelectedPlanet(null)}
-                className="absolute top-3 right-3 text-red-500 hover:text-red-400 text-xl font-bold focus:outline-none"
-                aria-label="Close planet details"
+                onClick={closeDetails}
+                className="absolute top-3 right-3 text-red-500 hover:text-red-400 text-xl font-bold"
               >
                 &times;
               </button>
-              <h3 className="text-3xl font-bold mb-4">{planetInfo?.name}</h3>
+              <h3 id="planet-details-title" className="text-3xl font-bold mb-4">
+                {planetInfo?.name}
+              </h3>
               <p className="text-lg">{planetInfo?.info}</p>
-            </div>
+            </section>
           </>
         )}
       </div>
-
-      <style>{`
-        @keyframes spin {
-          from { transform: rotate(0deg);}
-          to { transform: rotate(360deg);}
-        }
-      `}</style>
     </div>
+  );
+}
+
+// 3D Planet with orbit animation
+function Planet({ name, size, distance, color, speed, onClick }) {
+  const ref = useRef();
+
+  useFrame(({ clock }) => {
+    const t = clock.getElapsedTime() * (speed / 5);
+    ref.current.position.x = Math.cos(t) * distance;
+    ref.current.position.z = Math.sin(t) * distance;
+  });
+
+  return (
+    <mesh ref={ref} onClick={() => onClick(name)} castShadow receiveShadow>
+      <sphereGeometry args={[size, 32, 32]} />
+      <meshStandardMaterial color={color} />
+    </mesh>
+  );
+}
+
+// Orbit ring around the sun
+function OrbitRing({ radius, color }) {
+  const points = [];
+  for (let i = 0; i <= 64; i++) {
+    const angle = (i / 64) * Math.PI * 2;
+    points.push(
+      new THREE.Vector3(
+        Math.cos(angle) * radius,
+        0,
+        Math.sin(angle) * radius
+      )
+    );
+  }
+
+  const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
+
+  return (
+    <line geometry={lineGeometry}>
+      <lineBasicMaterial color={color} transparent opacity={0.5} />
+    </line>
   );
 }
