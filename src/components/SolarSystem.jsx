@@ -1,8 +1,21 @@
 import React, { useState, useCallback, useRef } from "react";
-import * as THREE from "three"; // ✅ Import THREE
+import * as THREE from "three";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Stars } from "@react-three/drei";
 import planets from "../data/planetsData";
+
+// Define orbit ring colors by their index number
+const orbitColors = [
+  "#FF4500", // 1 - orange red
+  "#1E90FF", // 2 - dodger blue
+  "#32CD32", // 3 - lime green
+  "#FFD700", // 4 - gold
+  "#FF69B4", // 5 - hot pink
+  "#00CED1", // 6 - dark turquoise
+  "#BA55D3", // 7 - medium orchid
+  "#FF8C00", // 8 - dark orange
+  "#00FA9A", // 9 - medium spring green
+];
 
 export default function SolarSystem() {
   const [selectedPlanet, setSelectedPlanet] = useState(null);
@@ -35,10 +48,10 @@ export default function SolarSystem() {
           </mesh>
 
           {/* Orbits & planets */}
-          {planets.map(({ name, size, distance, color, speed }) => (
+          {planets.map(({ name, size, distance, color, speed }, i) => (
             <group key={name}>
-              {/* Orbit matches planet color */}
-              <OrbitRing radius={distance / 2} color={color} />
+              {/* Orbit colored by orbit number */}
+              <OrbitRing radius={distance / 2} color={orbitColors[i % orbitColors.length]} />
               <Planet
                 name={name}
                 size={size / 2}
