@@ -1,22 +1,22 @@
 const teamMembers = [
   {
-    name: "Dr. Sarah Johnson",
-    role: "Mission Specialist",
-    img: "https://randomuser.me/api/portraits/women/65.jpg",
+    name: "Robiul Hasan Jisan",
+    role: "Ml & dl developer",
+    img: "/images/damish.jpg",
   },
   {
-    name: "Mark Thompson",
-    role: "Aerospace Engineer",
-    img: "https://randomuser.me/api/portraits/men/44.jpg",
+    name: "Asif Zaman",
+    role: "Ml & dl developer",
+    img: "/images/richkid.jpg",
   },
   {
-    name: "Emily Davis",
-    role: "Astrophysicist",
-    img: "https://randomuser.me/api/portraits/women/32.jpg",
+    name: "Afridi Akber Ifty",
+    role: "Web developer & Leader",
+    img: "/images/afridi_vai.jpg",
   },
   {
-    name: "James Wilson",
-    role: "Flight Director",
+    name: "Mehrab Al Aasin  Alvi",
+    role: "Vedio editor",
     img: "https://randomuser.me/api/portraits/men/51.jpg",
   },
   {
@@ -25,8 +25,8 @@ const teamMembers = [
     img: "https://randomuser.me/api/portraits/women/12.jpg",
   },
   {
-    name: "Michael Brown",
-    role: "Systems Analyst",
+    name: "Riaz Uddin",
+    role: "Ui/Ux designer",
     img: "https://randomuser.me/api/portraits/men/75.jpg",
   },
 ];
