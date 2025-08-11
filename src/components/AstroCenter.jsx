@@ -19,7 +19,7 @@ export default function AstroCenter({ size }) {
       >
         Astro
         <br />
-        Heroes
+        lopper
       </h2>
     </div>
   );

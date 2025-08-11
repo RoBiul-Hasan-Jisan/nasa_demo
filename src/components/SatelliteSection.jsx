@@ -148,11 +148,13 @@ export default function SatelliteSection() {
     <>
       <div
         style={{
-          width: "100vw",
+          width: "100%",
+          maxWidth: "100vw",
           height: "700px",
           position: "relative",
           background: "radial-gradient(ellipse at center, #0a0a0a 0%, #000000 80%)",
           fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+          overflowX: "hidden", // Prevent horizontal scrolling on mobile
         }}
       >
         <Canvas shadows camera={{ position: [0, 3, 20], fov: 50 }}>

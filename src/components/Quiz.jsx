@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { questionBank } from "../data/questions";
+import { questionBank } from "../data/questions"; // Your questions data
+import Rocket from "./Rocket";
 
 function getRandomQuestions(arr, num) {
   const shuffled = [...arr].sort(() => 0.5 - Math.random());
@@ -12,94 +13,144 @@ export default function Quiz() {
   const [selectedOption, setSelectedOption] = useState(null);
   const [score, setScore] = useState(0);
   const [showScore, setShowScore] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
     setQuestions(getRandomQuestions(questionBank, 5));
   }, []);
 
-  function handleOptionClick(option) {
+  const handleOptionClick = (option) => {
+    if (isAnimating) return;
     setSelectedOption(option);
-  }
+  };
 
-  function handleNext() {
-    if (!selectedOption) return;
+  const handleNext = () => {
+    if (!selectedOption || isAnimating) return;
+    setIsAnimating(true);
+  };
 
+  const onRocketLaunchComplete = () => {
     if (selectedOption === questions[currentIndex].answer) {
       setScore((prev) => prev + 1);
     }
-
     setSelectedOption(null);
-
     if (currentIndex + 1 < questions.length) {
       setCurrentIndex((prev) => prev + 1);
     } else {
       setShowScore(true);
     }
-  }
+    setIsAnimating(false);
+  };
 
-  function handleRestart() {
+  const handleRestart = () => {
+    if (isAnimating) return;
     setQuestions(getRandomQuestions(questionBank, 5));
     setCurrentIndex(0);
     setSelectedOption(null);
     setScore(0);
     setShowScore(false);
-  }
+  };
 
   if (questions.length === 0) {
-    return <div className="text-white">Loading questions...</div>;
+    return <div style={{ color: "white" }}>Loading questions...</div>;
   }
 
   return (
-    <div className="max-w-lg mx-auto bg-gray-900 p-6 rounded-lg text-white mt-16 shadow-lg relative z-10">
-      {!showScore ? (
-        <>
-          <div className="mb-4 text-xl font-semibold">
-            Question {currentIndex + 1} of {questions.length}
+    <>
+      <div
+        style={{
+          maxWidth: "32rem",
+          margin: "4rem auto",
+          padding: "1.5rem",
+          borderRadius: "0.5rem",
+          color: "white",
+          backgroundColor: isAnimating ? "black" : "#1f2937",
+          position: "relative",
+          minHeight: "220px",
+          textAlign: "center",
+          fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+          overflow: "hidden",
+          boxShadow: "0 10px 15px rgba(0,0,0,0.3)",
+          zIndex: 10,
+        }}
+      >
+        {isAnimating ? (
+          <Rocket launch={isAnimating} onLaunchComplete={onRocketLaunchComplete} />
+        ) : !showScore ? (
+          <>
+            <div style={{ fontSize: "1.25rem", fontWeight: "600", marginBottom: "1rem", textAlign: "left" }}>
+              Question {currentIndex + 1} of {questions.length}
+            </div>
+            <div style={{ fontSize: "1.125rem", marginBottom: "1.5rem", textAlign: "left" }}>
+              {questions[currentIndex].question}
+            </div>
+            <div style={{ marginBottom: "1rem" }}>
+              {questions[currentIndex].options.map((option) => (
+                <button
+                  key={option}
+                  onClick={() => handleOptionClick(option)}
+                  disabled={isAnimating}
+                  style={{
+                    width: "100%",
+                    padding: "0.5rem 0",
+                    marginBottom: "0.75rem",
+                    borderRadius: "0.375rem",
+                    border: "1px solid #4b5563",
+                    backgroundColor: selectedOption === option ? "#fbbf24" : "#1f2937",
+                    color: selectedOption === option ? "black" : "white",
+                    fontWeight: selectedOption === option ? "700" : "400",
+                    cursor: isAnimating ? "not-allowed" : "pointer",
+                    transition: "all 0.3s ease",
+                  }}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={handleNext}
+              disabled={!selectedOption || isAnimating}
+              style={{
+                width: "100%",
+                padding: "0.75rem 0",
+                borderRadius: "0.375rem",
+                fontWeight: "600",
+                backgroundColor: selectedOption && !isAnimating ? "#fbbf24" : "#374151",
+                color: selectedOption && !isAnimating ? "black" : "#9ca3af",
+                cursor: selectedOption && !isAnimating ? "pointer" : "not-allowed",
+                border: "none",
+                transition: "background-color 0.3s ease",
+              }}
+            >
+              {currentIndex + 1 === questions.length ? "Finish" : "Next"}
+            </button>
+          </>
+        ) : (
+          <div>
+            <h2 style={{ fontSize: "1.875rem", fontWeight: "700", marginBottom: "1rem" }}>Your Score</h2>
+            <p style={{ fontSize: "1.25rem", marginBottom: "1.5rem" }}>
+              You scored {score} out of {questions.length}
+            </p>
+            <button
+              onClick={handleRestart}
+              style={{
+                backgroundColor: "#fbbf24",
+                color: "black",
+                padding: "0.75rem 1.5rem",
+                borderRadius: "0.375rem",
+                fontWeight: "600",
+                border: "none",
+                cursor: "pointer",
+                transition: "background-color 0.3s ease",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#d97706")}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#fbbf24")}
+            >
+              Restart Quiz
+            </button>
           </div>
-          <div className="mb-6 text-lg">{questions[currentIndex].question}</div>
-          <div className="space-y-4">
-            {questions[currentIndex].options.map((option) => (
-              <button
-                key={option}
-                onClick={() => handleOptionClick(option)}
-                className={`w-full py-2 rounded-md border border-gray-600 hover:border-yellow-400 transition
-                  ${
-                    selectedOption === option
-                      ? "bg-yellow-500 text-black font-bold"
-                      : "bg-gray-800"
-                  }
-                `}
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-          <button
-            onClick={handleNext}
-            disabled={!selectedOption}
-            className={`mt-6 w-full py-3 rounded-md font-semibold ${
-              selectedOption
-                ? "bg-yellow-500 hover:bg-yellow-600 text-black cursor-pointer"
-                : "bg-gray-700 text-gray-400 cursor-not-allowed"
-            }`}
-          >
-            {currentIndex + 1 === questions.length ? "Finish" : "Next"}
-          </button>
-        </>
-      ) : (
-        <div className="text-center">
-          <h2 className="text-3xl font-bold mb-4">Your Score</h2>
-          <p className="text-xl mb-6">
-            You scored {score} out of {questions.length}
-          </p>
-          <button
-            onClick={handleRestart}
-            className="bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-3 rounded-md font-semibold"
-          >
-            Restart Quiz
-          </button>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </>
   );
 }
